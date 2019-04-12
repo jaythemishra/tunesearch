@@ -1,0 +1,2 @@
+We created sequences to implement the serial IDs for the token and tf_idf tables.
+We're not sure if this was the correct or expected implementation, but this is what we found on the internet using resources like Stack Overflow when trying to figure out how to implement serial primary keys.
