@@ -30,6 +30,7 @@ CREATE TABLE token (
 
 CREATE TABLE tf_idf (
     id          bigint NOT NULL,
+    idf         integer,
     score       decimal,
     PRIMARY KEY (id),
     FOREIGN KEY (id) REFERENCES token(id)
