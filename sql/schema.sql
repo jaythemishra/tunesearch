@@ -5,13 +5,13 @@ DROP TABLE IF EXISTS artist;
 
 
 CREATE TABLE artist (
-    id          smallint NOT NULL,
+    id          smallint,
     artist_name varchar(50),
     PRIMARY KEY (id)
 );
 
 CREATE TABLE song (
-    id          integer NOT NULL,
+    id          integer,
     artist_id   smallint,
     song_name   varchar(100),
     song_url    varchar(150),
@@ -29,7 +29,7 @@ CREATE TABLE token (
 );
 
 CREATE TABLE tf_idf (
-    id          bigint NOT NULL,
+    id          bigint,
     idf         integer,
     score       decimal,
     PRIMARY KEY (id),
