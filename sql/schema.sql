@@ -1,36 +1,33 @@
-DROP TABLE IF EXISTS tf_idf;
+DROP TABLE IF EXISTS tfidf;
 DROP TABLE IF EXISTS token;
 DROP TABLE IF EXISTS song;
 DROP TABLE IF EXISTS artist;
 
 
 CREATE TABLE artist (
-    id          smallint NOT NULL,
-    artist_name varchar(50),
-    PRIMARY KEY (id)
+	artist_id INTEGER PRIMARY KEY,
+	artist_name VARCHAR(255)
+);
+
+
+CREATE TABLE token (
+	song_id INTEGER,
+	token VARCHAR(255),
+	count INTEGER,
+	PRIMARY KEY (song_id, token)
 );
 
 CREATE TABLE song (
-    id          integer NOT NULL,
-    artist_id   smallint,
-    song_name   varchar(100),
-    song_url    varchar(150),
-    PRIMARY KEY (id),
-    FOREIGN KEY (artist_id) REFERENCES artist(id)
+	song_id INTEGER PRIMARY KEY,
+	artist_id INTEGER REFERENCES artist(artist_id),
+	song_name VARCHAR(255),
+	page_link VARCHAR(1000)
+	/* , FOREIGN KEY (artist_id) REFERENCES artist (artist_id) */
 );
 
-CREATE TABLE token (
-    id          bigserial,
-    song_id     integer,
-    token       varchar(110),
-    frequency   smallint,
-    PRIMARY KEY (id),
-    FOREIGN KEY (song_id) REFERENCES song(id)
-);
-
-CREATE TABLE tf_idf (
-    id          bigint NOT NULL,
-    score       decimal,
-    PRIMARY KEY (id),
-    FOREIGN KEY (id) REFERENCES token(id)
+CREATE TABLE tfidf (
+	song_id INTEGER,
+	token VARCHAR(255),
+	score FLOAT,
+	PRIMARY KEY(song_id, token)
 );
