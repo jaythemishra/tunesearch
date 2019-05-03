@@ -41,8 +41,8 @@ def _get_tokens(query):
 
 def search(query, query_type):
     
-    rewritten_query = _get_tokens(query)
-
+    rewritten_query = tuple(_get_tokens(query))
+    
     """TODO
     Your code will go here. Refer to the specification for projects 1A and 1B.
     But your code should do the following:
@@ -64,27 +64,58 @@ def search(query, query_type):
             -- put connection into its own module to clean it up
         """
         query_or = """SELECT
-            s.song_id,
-            SUM(tfidf_scores.score) AS total_score,
-            s.artist_id,
             s.song_name,
+            a.artist_name,
             s.page_link
             FROM (
             SELECT song_id, token, score
             FROM tfidf
-            WHERE token IN ('yellow')
+            WHERE token IN %s
             ) tfidf_scores
             LEFT JOIN song s
             ON s.song_id = tfidf_scores.song_id
-            GROUP BY s.song_id
-            ORDER BY total_score DESC"""
+            LEFT JOIN artist a
+            ON a.artist_id = s.artist_id
+            GROUP BY s.song_name, a.artist_name, s.page_link
+            ORDER BY SUM(tfidf_scores.score) DESC"""
+
+        query_and = """SELECT
+            s.song_name,
+            a.artist_name,
+            s.page_link
+            FROM (
+            SELECT l.song_id, l.token, l.score, r.ref_count
+            FROM tfidf AS l
+            LEFT JOIN (
+                SELECT song_id, COUNT(song_id) AS ref_count
+                FROM tfidf
+                WHERE token IN %s
+                GROUP BY song_id
+            ) r
+            ON r.song_id = l.song_id
+            WHERE token IN %s AND ref_count = %s
+            -- ref_count is the # of unique words searched for --
+            -- we're basically making sure the # of times that
+            -- song came up in the or clause matches the # of
+            -- unique words searched for. if so, we have an AND match,
+            -- otherwise that song id is missing 1 or more of the words searched.
+            ) tfidf_scores
+            LEFT JOIN song s
+            ON s.song_id = tfidf_scores.song_id
+            LEFT JOIN artist a
+            ON a.artist_id = s.artist_id
+            GROUP BY s.song_name, a.artist_name, s.page_link
+            ORDER BY SUM(tfidf_scores.score) DESC"""
 
         connection = psycopg2.connect(user = "cs143",
                                     password = "cs143",
                                     host = "localhost",
                                     database = "searchengine")
         cursor = connection.cursor()
-        cursor.execute(query_or)
+        if query_type == 'or':
+            cursor.execute(query_or, (rewritten_query,))
+        else:
+            cursor.execute(query_and, (rewritten_query, rewritten_query, len(rewritten_query)))
 
         rows = cursor.fetchall()
 
