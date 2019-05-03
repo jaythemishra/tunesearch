@@ -37,12 +37,7 @@ def _get_tokens(query):
             rewritten_query.append(cleaned_token)
     return rewritten_query
 
-
-
-def search(query, query_type):
-    
-    rewritten_query = tuple(_get_tokens(query))
-    
+def search(query, query_type, page):
     """TODO
     Your code will go here. Refer to the specification for projects 1A and 1B.
     But your code should do the following:
@@ -53,7 +48,7 @@ def search(query, query_type):
     5. The parameters passed to the search function may need to be changed for 1B. 
     """
 
-
+    rewritten_query = tuple(_get_tokens(query))
     rows = []
 
     try:
@@ -63,7 +58,10 @@ def search(query, query_type):
 
             -- put connection into its own module to clean it up
         """
-        query_or = """SELECT
+        drop_materialized_view = """DROP MATERIALIZED VIEW IF EXISTS search_results"""
+
+        query_or = """CREATE MATERIALIZED VIEW search_results AS
+            SELECT
             s.song_name,
             a.artist_name,
             s.page_link
@@ -79,7 +77,8 @@ def search(query, query_type):
             GROUP BY s.song_name, a.artist_name, s.page_link
             ORDER BY SUM(tfidf_scores.score) DESC"""
 
-        query_and = """SELECT
+        query_and = """CREATE MATERIALIZED VIEW search_results AS
+            SELECT
             s.song_name,
             a.artist_name,
             s.page_link
@@ -107,20 +106,32 @@ def search(query, query_type):
             GROUP BY s.song_name, a.artist_name, s.page_link
             ORDER BY SUM(tfidf_scores.score) DESC"""
 
+        query_page = """SELECT *
+            FROM search_results
+            LIMIT 20
+            OFFSET %s"""
+
         connection = psycopg2.connect(user = "cs143",
                                     password = "cs143",
                                     host = "localhost",
                                     database = "searchengine")
         cursor = connection.cursor()
-        if query_type == 'or':
-            cursor.execute(query_or, (rewritten_query,))
+        if page < 0:
+            cursor.execute(drop_materialized_view)
+            if query_type == 'or':
+                cursor.execute(query_or, (rewritten_query,))
+            else:
+                cursor.execute(query_and, (rewritten_query, rewritten_query, len(rewritten_query)))
+            cursor.execute(query_page, (0,))
+            rows = cursor.fetchall()
+            connection.commit()
+            page = 0
         else:
-            cursor.execute(query_and, (rewritten_query, rewritten_query, len(rewritten_query)))
-
-        rows = cursor.fetchall()
+            cursor.execute(query_page, (20 * page,))
+            rows = cursor.fetchall()
 
     except (Exception, psycopg2.Error) as error :
-        print ("Error while connecting to PostgreSQL", error)
+        print ("Error while connecting to PostgreSQL:", error)
         """TODO: Return something meaningful here """
 
     finally:
@@ -129,11 +140,11 @@ def search(query, query_type):
             connection.close()
             print("PostgreSQL connection is closed")
 
-    return rows
+    return (page, rows)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
-        result = search(' '.join(sys.argv[2:]), sys.argv[1].lower())
+        result = search(' '.join(sys.argv[2:]), sys.argv[1].lower(), 0)
         print(result)
     else:
         print("USAGE: python3 search.py [or|and] term1 term2 ...")

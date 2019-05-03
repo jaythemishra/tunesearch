@@ -9,20 +9,29 @@ app.debug = True
 
 @app.route('/search', methods=["GET"])
 def dosearch():
-    query = request.args['query']
-    qtype = request.args['query_type']
-
     """
     TODO:
     Use request.args to extract other information
     you may need for pagination.
     """
 
-    search_results = search.search(query, qtype)
+    pageNum = request.args.get('page', -1)
+    query = request.args['query']
+    qtype = request.args['query_type']
+    pageNum = int(pageNum)
+
+    search_results = search.search(query, qtype, pageNum)
+
+    pageNum = search_results[0]
+    rows = search_results[1]
+
     return render_template('results.html',
             query=query,
-            results=len(search_results),
-            search_results=search_results)
+            query_type=qtype,
+            results=len(rows),
+            search_results=rows,
+            page=pageNum)
+
 
 @app.route("/")
 def index():

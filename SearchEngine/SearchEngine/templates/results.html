@@ -9,7 +9,7 @@
 				<img src="/static/header.png" width=100px height=30px>
 			</div>
 			<div id="searchbar">
-				 <form action="{{ url_for('dosearch') }}" method="GET">
+				<form action="{{ url_for('dosearch') }}" method="GET">
 					<div>
 						<input type="radio" name="query_type" value="or" checked>
 						<label for="or">OR</label>
@@ -27,6 +27,26 @@
 		{% for result in search_results %}
 		<p><strong><a href="http://www.lyricsfreak.com{{ result[2] }}" target="_blank">{{ result[0] }}</a></strong> <em>by</em> {{ result[1] }} </p>
 		{% endfor %}
+		{% if results == 20 %}
+			<form action="{{ url_for('dosearch') }}" method="GET">
+				<div>
+					<input type="hidden" name="query" value="{{query}}">
+					<input type="hidden" name="query_type" value="{{query_type}}">
+					<input type="hidden" name="page" value="{{page + 1}}">
+					<input type="submit" value="Next">
+				</div>
+			</form>
+		{% endif %}
+		{% if page > 0 %}
+			<form action="{{ url_for('dosearch') }}" method="GET">
+				<div>
+					<input type="hidden" name="query" value="{{query}}">
+					<input type="hidden" name="query_type" value="{{query_type}}">
+					<input type="hidden" name="page" value="{{page - 1}}">
+					<input type="submit" value="Previous">
+				</div>
+			</form>
+		{% endif %}
 		{% else %}
 
 		<p><strong>No results for </strong>{{query}}</p>
