@@ -24,10 +24,8 @@ def dosearch():
             results=len(search_results),
             search_results=search_results)
 
-@app.route("/", methods=["GET"])
+@app.route("/")
 def index():
-    if request.method == "GET":
-        pass
     return render_template('index.html')
 
 if __name__ == "__main__":

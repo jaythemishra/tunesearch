@@ -5,6 +5,8 @@ import re
 import string
 import sys
 
+from connect import connect
+
 _PUNCTUATION = frozenset(string.punctuation)
 
 def _remove_punc(token):
@@ -44,13 +46,58 @@ def search(query, query_type):
     """TODO
     Your code will go here. Refer to the specification for projects 1A and 1B.
     But your code should do the following:
-    1. Connect to the Postgres database.
-    2. Graciously handle any errors that may occur (look into try/except/finally).
-    3. Close any database connections when you're done.
+    DONE            Connect to the Postgres database.
+    SOMEWHAT DONE   Graciously handle any errors that may occur (look into try/except/finally).
+    DONE            Close any database connections when you're done.
     4. Write queries so that they are not vulnerable to SQL injections.
     5. The parameters passed to the search function may need to be changed for 1B. 
     """
+
+
     rows = []
+
+    try:
+        """TODO
+            make this all dynamic, this is just here as a test to make sure that
+            it successfully connects to the database
+
+            -- put connection into its own module to clean it up
+        """
+        query_or = """SELECT
+            s.song_id,
+            SUM(tfidf_scores.score) AS total_score,
+            s.artist_id,
+            s.song_name,
+            s.page_link
+            FROM (
+            SELECT song_id, token, score
+            FROM tfidf
+            WHERE token IN ('yellow')
+            ) tfidf_scores
+            LEFT JOIN song s
+            ON s.song_id = tfidf_scores.song_id
+            GROUP BY s.song_id
+            ORDER BY total_score DESC"""
+
+        connection = psycopg2.connect(user = "cs143",
+                                    password = "cs143",
+                                    host = "localhost",
+                                    database = "searchengine")
+        cursor = connection.cursor()
+        cursor.execute(query_or)
+
+        rows = cursor.fetchall()
+
+    except (Exception, psycopg2.Error) as error :
+        print ("Error while connecting to PostgreSQL", error)
+        """TODO: Return something meaningful here """
+
+    finally:
+        if (connection):
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
     return rows
 
 if __name__ == "__main__":

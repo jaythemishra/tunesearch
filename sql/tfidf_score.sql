@@ -39,7 +39,7 @@ SELECT
 FROM (
   SELECT song_id, token, score
   FROM tfidf
-  WHERE token IN ('clockworktime','anne') -- enumerate the words here --
+  WHERE token IN ('southern', 'california')-- enumerate the words here --
 ) tfidf_scores
 LEFT JOIN song s
 ON s.song_id = tfidf_scores.song_id
@@ -63,11 +63,11 @@ FROM (
   LEFT JOIN (
     SELECT song_id, COUNT(song_id) AS ref_count
     FROM tfidf
-    WHERE token IN ('hey','mister', 'blue', 'southern', 'california')
+    WHERE token IN  ('party', 'in', 'the', 'u.s.a')
     GROUP BY song_id
   ) r
   ON r.song_id = l.song_id
-  WHERE token IN ('hey','mister', 'blue', 'southern', 'california') AND ref_count = 5
+  WHERE token IN ('party', 'in', 'the', 'u.s.a') AND ref_count = 4
   -- ref_count is the # of unique words searched for --
   -- we're basically making sure the # of times that
   -- song came up in the or clause matches the # of
