@@ -1,24 +1,41 @@
 <html>
-        <head>
-                <title>TuneSearch</title>
-                <link rel="stylesheet" type="text/css" href="/static/searchengine.css" media="screen" />
-        </head>
-        <body>
-                <div class="box">
-                        <div>
-                                <img src="/static/header.png" />
-                        </div>
-                        <div id="searchbar">
-                                <form action="{{ url_for('dosearch') }}" method="GET">
-                                <div>
-                                                <input type="radio" name="query_type" value="or" checked>
-                                                <label for="or">OR</label>
-                                                <input type="radio" name="query_type" value="and">
-                                             	<label for="and">AND</label>
-                                               	<input type="text" maxlength=50 size=50 name="query"><input type="submit" value="Search">
-                                </div>
-                                </form>
-                        </div>
-                </div>
-        </body>
+  <head>
+    <link
+      href="https://fonts.googleapis.com/css?family=Archivo+Black"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Chivo"
+      rel="stylesheet"
+    />
+    <title>TuneSearch</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/static/searchengine.css"
+      media="screen"
+    />
+  </head>
+  <body>
+    <div class="box">
+      <div>
+        <div id="logo">tunesearch</div>
+      </div>
+      <div id="searchbar">
+        <form action="{{ url_for('dosearch') }}" method="GET">
+          <div>
+            <input type="radio" name="query_type" value="or" checked />
+            <label for="or">OR</label>
+            <input type="radio" name="query_type" value="and" />
+            <label for="and">AND</label>
+            <input type="text" maxlength="50" size="50" name="query" /><input
+              type="submit"
+              placeholder="Type your search here..."
+              value="Search"
+            />
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
 </html>
